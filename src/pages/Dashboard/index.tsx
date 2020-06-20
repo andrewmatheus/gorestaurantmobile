@@ -59,9 +59,49 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     async function loadFoods(): Promise<void> {
-      const response = await api.get('/foods');
+      if (selectedCategory || searchValue) {
+        if (selectedCategory) {
+          const response = await api.get(
+            `/foods?category_like=${selectedCategory}`,
+          );
+          const listFoodsCategory = response.data;
 
-      setFoods(response.data);
+          const newFood = listFoodsCategory.map((food: Food) => {
+            return {
+              ...food,
+              formattedPrice: formatValue(food.price),
+            };
+          });
+
+          setFoods(newFood);
+        }
+
+        if (searchValue) {
+          const response = await api.get(`/foods?name_like=${searchValue}`);
+          const listFoodsSearchValue = response.data;
+
+          const newFood = listFoodsSearchValue.map((food: Food) => {
+            return {
+              ...food,
+              formattedPrice: formatValue(food.price),
+            };
+          });
+
+          setFoods(newFood);
+        }
+      } else {
+        const response = await api.get('/foods');
+        const listFoods = response.data;
+
+        const newFood = listFoods.map((food: Food) => {
+          return {
+            ...food,
+            formattedPrice: formatValue(food.price),
+          };
+        });
+
+        setFoods(newFood);
+      }
     }
 
     loadFoods();
@@ -78,11 +118,11 @@ const Dashboard: React.FC = () => {
   }, []);
 
   function handleSelectCategory(id: number): void {
-    if (selectedCategory !== id) {
-      setSelectedCategory(id);
-    } else {
-      setSelectedCategory(0);
+    if (selectedCategory === id) {
+      setSelectedCategory(undefined);
+      return;
     }
+    setSelectedCategory(id);
   }
 
   return (
