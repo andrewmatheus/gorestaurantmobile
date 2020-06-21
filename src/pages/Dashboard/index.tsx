@@ -59,49 +59,21 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     async function loadFoods(): Promise<void> {
-      if (selectedCategory || searchValue) {
-        if (selectedCategory) {
-          const response = await api.get(
-            `/foods?category_like=${selectedCategory}`,
-          );
-          const listFoodsCategory = response.data;
+      const response = await api.get('/foods', {
+        params: {
+          category_like: selectedCategory,
+          name_like: searchValue,
+        },
+      });
 
-          const newFood = listFoodsCategory.map((food: Food) => {
-            return {
-              ...food,
-              formattedPrice: formatValue(food.price),
-            };
-          });
+      const listFoodsCategorySearch = response.data.map((food: Food) => {
+        return {
+          ...food,
+          formattedPrice: formatValue(food.price),
+        };
+      });
 
-          setFoods(newFood);
-        }
-
-        if (searchValue) {
-          const response = await api.get(`/foods?name_like=${searchValue}`);
-          const listFoodsSearchValue = response.data;
-
-          const newFood = listFoodsSearchValue.map((food: Food) => {
-            return {
-              ...food,
-              formattedPrice: formatValue(food.price),
-            };
-          });
-
-          setFoods(newFood);
-        }
-      } else {
-        const response = await api.get('/foods');
-        const listFoods = response.data;
-
-        const newFood = listFoods.map((food: Food) => {
-          return {
-            ...food,
-            formattedPrice: formatValue(food.price),
-          };
-        });
-
-        setFoods(newFood);
-      }
+      setFoods(listFoodsCategorySearch);
     }
 
     loadFoods();
